@@ -14,6 +14,8 @@ After installing it, the corresponding `.dll` (Windows) or `.so` (Linux) file ne
 
 ![alt text](img/prismlauncher_natives_print.png)
 
-That said, Prism Launcher (and presumably many other launchers based on MultiMC) will not let you override the path to the natives directory, **and the path it does set gets deleted when you close the game!** You'll have to copy the library into the `natives` directory every time you start up the game.
+That said, Prism Launcher (and presumably many other launchers based on MultiMC) will not let you override the path to the natives directory, **and the path it does set gets deleted when you close the game!** You'll have to copy the library into the `natives` directory every time you start up the game. 
+
+If this sounds inconvienent for you, you may consider building the mod from source via [RetroMCP-java](http://github.com/MCPHackers/RetroMCP-Java) and launching the game from within the program, as it doesn't delete its natives directory.
 
 Those are the only specific instructions. Installing the autosplitter script is exactly as you would any other game.
