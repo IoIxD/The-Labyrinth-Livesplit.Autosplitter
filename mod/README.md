@@ -12,5 +12,5 @@ Currently, only building on Linux is supported.
 
 Run either:
 
-- `make linux` for an .so file (effectively useless but it's there)
-- `make windows` for an .so file (requires MinGW to be installed)
+- `make windows` for an .dll file (requires MinGW to be installed)
+- `make linux` for an .so file (effectively useless because we support a version of LiveSplit that's only on Windows but it's there)

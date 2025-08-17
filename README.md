@@ -10,7 +10,7 @@ First of all, since it's a coremod, you'll need to install it via a different op
 
 ![alt text](img/prismlauncher_coremod.png)
 
-After installing it, the corresponding `.dll` (Windows) or `.so` (Linux) file needs to be placed in the appropriate natives directory for your Minecraft instance so that it can be run at runtime. If you don't know what the directory is, the mod will print it out when it tries to load it; since you can get to the title screen without copying the file, you can simply load into a world, have the game crash, and check the logs for whatever the directory is.
+After installing it, the corresponding `.dll` file needs to be placed in the appropriate natives directory for your Minecraft instance so that it can be run at runtime. If you don't know what the directory is, the mod will print it out when it tries to load it; since you can get to the title screen without copying the file, you can simply load into a world, have the game crash, and check the logs for whatever the directory is.
 
 ![alt text](img/prismlauncher_natives_print.png)
 
