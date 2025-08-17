@@ -1,0 +1,44 @@
+--- net/minecraft/src/PlayerControllerSP.java
++++ net/minecraft/src/PlayerControllerSP.java
+@@ -1,8 +1,11 @@
+ package net.minecraft.src;
+ 
+ import net.minecraft.client.Minecraft;
++import net.minecraft.src.LabyrinthModNative;
+ 
+ public class PlayerControllerSP extends PlayerController {
++	private LabyrinthModNative labyrinthModNative;
++
+ 	private int curBlockX = -1;
+ 	private int curBlockY = -1;
+ 	private int curBlockZ = -1;
+@@ -15,6 +18,8 @@
+ 
+ 	public PlayerControllerSP(Minecraft var1) {
+ 		super(var1);
++		this.labyrinthModNative = new LabyrinthModNative();
++		this.labyrinthModNative.init();
+ 	}
+ 
+ 	public void flipPlayer(EntityPlayer var1) {
+@@ -116,6 +121,7 @@
+ 	}
+ 
+ 	public void onUpdate() {
++		labyrinthModNative.setCoords(this.curBlockX, this.curBlockY, this.curBlockZ);
+ 		this.prevBlockDamage = this.curBlockDamage;
+ 		this.monsterSpawner.onUpdate(this.mc.theWorld);
+ 		this.animalSpawner.onUpdate(this.mc.theWorld);
+--- /dev/null
++++ net/minecraft/src/LabyrinthModNative.java
+@@ -1,0 +1,10 @@
++package net.minecraft.src;
++
++public class LabyrinthModNative {
++    static {
++        System.loadLibrary("LabyrinthModNative");
++    }
++
++    public native void init();
++    public native void setCoords(float x, float y, float z);
++}
