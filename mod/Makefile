@@ -9,4 +9,4 @@ linux:
 
 windows:
 	x86_64-w64-mingw32-gcc -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux mod.c
-	x86_64-w64-mingw32-gcc -nostdlib -lgcc mod.o -shared -o LabyrinthModNative.dll
+	x86_64-w64-mingw32-gcc mod.o -shared -o LabyrinthModNative.dll
