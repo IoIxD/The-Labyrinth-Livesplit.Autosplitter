@@ -26,6 +26,6 @@ Those are the only specific instructions. Installing the autosplitter script is 
 
 # Building
 
-Get [RetroMCP-Java](http://github.com/MCPHackers/RetroMCP-Java) and decompile version Alpha 1.1.2. Apply the current code by placing the patch file in `minecraft/src` and doing `git patch`.
+Get [RetroMCP-Java](http://github.com/MCPHackers/RetroMCP-Java) and decompile version Alpha 1.1.2. Apply the current code by placing the patch file in `minecraft/src` and doing `git patch`. Click Recompile to recompile the mod, then (optionally) click MCP->Launch client to launch the game with the mod installed.
 
 For committing changes, create a patch file via `Create Patch` and submit that.
