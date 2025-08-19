@@ -28,17 +28,17 @@ init {
     vars.PlayerYPtr = (IntPtr)(vars.FitnessGramPacerTest + 296);
     vars.PlayerZPtr = (IntPtr)(vars.FitnessGramPacerTest + 304);
 
-    vars.splits = new Dictionary<string, Func<string>>()
+    vars.splits = new Dictionary<string, Func<bool>>()
     {
-        {"Checkpoint2",  () => vars.PlayerX >= 276 && vars.PlayerX <= 278 && vars.PlayerZ >= -101 && vars.PlayerZ <= -94},
+        {"Checkpoint2",  () => vars.PlayerX >= 276 && vars.PlayerX <= 278 && vars.PlayerZ >= -101 && vars.PlayerZ <= -94 && vars.PlayerY <= 20},
         {"Checkpoint3",  () => vars.PlayerX >= 234 && vars.PlayerX <= 259 && vars.PlayerZ >= -83 && vars.PlayerZ <= -80},
         {"Checkpoint4",  () => vars.PlayerX >= 236 && vars.PlayerX <= 283 && vars.PlayerZ >= -41 && vars.PlayerZ <= -38},
         {"Checkpoint5",  () => vars.PlayerX >= 300 && vars.PlayerX <= 312 && vars.PlayerZ >= -67 && vars.PlayerZ <= -59},
-        {"Checkpoint6",  () => vars.PlayerX >= 275 && vars.PlayerX <= 277 && vars.PlayerZ == -191},
+        {"Checkpoint6",  () => vars.PlayerX >= 275 && vars.PlayerX <= 277 && vars.PlayerZ >= -192 && vars.PlayerZ <= -190},
         {"WoodenTower",  () => vars.PlayerX >= 269 && vars.PlayerX <= 293 && vars.PlayerZ >= -283 && vars.PlayerZ <= -258},
-        {"Waterfalls",   () => vars.PlayerX >= 286 && vars.PlayerX <= 294 && vars.PlayerZ >= -182 && vars.PlayerZ <= -186},
-        {"LastLevel",    () => vars.PlayerX >= 369 && vars.PlayerX <= 399 && vars.PlayerZ >= -265 && vars.PlayerZ <= -296},
-        {"TheEnd", () => vars.PlayerX >= -283 && vars.PlayerX <= -325 && vars.PlayerX >= -283 && vars.PlayerX <= -325},
+        {"Waterfalls",   () => vars.PlayerX >= 279 && vars.PlayerX <= 283 && vars.PlayerY >= 93 && vars.PlayerY <= 96 && vars.PlayerZ >= -271 && vars.PlayerZ <= -264 },
+        {"LastLevel",    () => vars.PlayerX >= 369 && vars.PlayerX <= 399 && vars.PlayerZ >= -296 && vars.PlayerZ <= -265},
+        {"TheEnd", () => vars.PlayerX >= 471 && vars.PlayerX <= 552 && vars.PlayerY >= 15 && vars.PlayerY <= 68 && vars.PlayerZ >= -325 && vars.PlayerZ <= -283},
     };
     vars.completedSplits = new HashSet<string>();
 
@@ -54,18 +54,19 @@ update {
     vars.PlayerY = game.ReadValue<double>((IntPtr)vars.PlayerYPtr);
     vars.PlayerZ = game.ReadValue<double>((IntPtr)vars.PlayerZPtr);
 
+    // print(vars.PlayerY.ToString());
     // print(vars.PlayerX.ToString()+", "+vars.PlayerZ.ToString());
 }
 
 
 reset {
-    if(vars.PlayerX >= 275 && vars.PlayerX <= 279 && vars.PlayerZ >= -208 && vars.PlayerZ <= -179) {
+    if(vars.PlayerX >= 275 && vars.PlayerX <= 279 && vars.PlayerZ >= -208 && vars.PlayerZ <= -179 && vars.PlayerY <= 20) {
         return true;
     }
 }
 
 start {
-    if(vars.PlayerX >= 255 && vars.PlayerX <= 299 && vars.PlayerZ >= -178 && vars.PlayerZ <= -135) {
+    if(vars.PlayerX >= 255 && vars.PlayerX <= 299 && vars.PlayerZ >= -178 && vars.PlayerZ <= -135 && vars.PlayerY <= 20) {
         return true;
     }
 }
@@ -77,14 +78,16 @@ onReset
 
 split
 {
-    foreach(var split in vars.splits[(int)current.chapter - 1])
+    foreach(var split in vars.splits)
     {
         if(!settings[split.Key] || 
            vars.completedSplits.Contains(split.Key) ||
-           !split.Value(version, old, current)) continue;
+           !split.Value())  {
+            continue;
+           };
 
         vars.completedSplits.Add(split.Key);
-        print("[Labyrinth] Split triggered (" + split.Key + ")");
+        print("[Minecraft Labyrinth] Split triggered (" + split.Key + ")");
         return true;
     }
 }
