@@ -9,7 +9,7 @@ b.) makes a autosplitter possible, by copying said position in memory in such a 
 
 ![ingame text](img/ingame_notice.png)
 
-# [Mod Download](https://github.com/IoIxD/The-Labyrinth-Livesplit.Autosplitter/releases/latest)
+# [Mod Download](https://github.com/IoIxD/The-Labyrinth-Speedrunning-Resources/releases/latest)
 
 # Usage
 
