@@ -123,7 +123,7 @@
 +    static boolean Loaded = false;
 +    static long TimeSinceTried = 0;
 +
-+    
++
 +    static {
 +        try {
 +            System.out.println("Looking in "+System.getProperty("java.library.path")+" for libraries");
