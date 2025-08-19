@@ -1,6 +1,13 @@
-# The-Labyrinth-Livesplit.Autosplitter
+# "The Labyrinth" Speedrunning Utilites
 
-These are resources for having LiveSplit automatically split while playing the first Minecraft adventure map, [The Labyrinth](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/maps/1454461-adv-the-labyrinth-a-dungeon-map-third-semifinal). It includes a mod for Minecraft Alpha 1.1.2 to store the player's position in a way that other program(s) can inspect, as well as the relevant autosplitter scripts.
+This repo resources for speedrunning [The Labyrinth](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/maps/1454461-adv-the-labyrinth-a-dungeon-map-third-semifinal), the earliest known Minecraft adventure map. 
+
+It includes a mod for Minecraft Alpha 1.1.2 that:
+
+a.) that shows the player's position on screen.
+b.) makes a autosplitter possible, by copying said position in memory in such a way that external programs can hook into.
+
+![ingame text](img/ingame_notice.png)
 
 # [Mod Download](https://github.com/IoIxD/The-Labyrinth-Livesplit.Autosplitter/releases/latest)
 
@@ -14,7 +21,7 @@ First of all, since it's a coremod, you'll need to install it differently. For P
 
 In absense of a launcher, you'll need to extract the .zip and put the .class files in your minecraft.jar.
 
-After installing it, the corresponding `.dll` file needs to be placed in the appropriate natives directory for your Minecraft instance so that it can be run at runtime. If you don't know what the directory is, the mod will print it out when it tries to load it; since you can get to the title screen without copying the file, you can simply load into a world, have the game crash, and check the logs for whatever the directory is.
+If you want the autosplitter to work, then after installing it, the corresponding `.dll` file needs to be placed in the appropriate natives directory for your Minecraft instance so that it can be run at runtime. If you don't know what the directory is, the mod will print it out when it tries to load it, something that happens when you open up a world.
 
 ![alt text](img/prismlauncher_natives_print.png)
 

@@ -1,3 +1,58 @@
+--- net/minecraft/src/GuiIngame.java
++++ net/minecraft/src/GuiIngame.java
+@@ -10,6 +10,9 @@
+ import org.lwjgl.opengl.GL12;
+ 
+ public class GuiIngame extends Gui {
++	private Vec3D playerPos;
++	private boolean tryDrawLBMStatus;
++
+ 	private static RenderItem itemRenderer = new RenderItem();
+ 	private List chatMessageList = new ArrayList();
+ 	private Random rand = new Random();
+@@ -23,6 +26,8 @@
+ 
+ 	public GuiIngame(Minecraft var1) {
+ 		this.mc = var1;
++		this.playerPos = Vec3D.createVector(0, 0, 0);
++		this.tryDrawLBMStatus = true;
+ 	}
+ 
+ 	public void renderGameOverlay(float var1, boolean var2, int var3, int var4) {
+@@ -154,6 +159,33 @@
+ 			this.drawString(var8, var21, var6 - var8.getStringWidth(var21) - 2, 12, 14737632);
+ 		} else {
+ 			var8.drawStringWithShadow("Minecraft Alpha v1.1.2", 2, 2, 16777215);
++			if(EntityPlayer.Position != null) {
++				if (EntityPlayer.Position.xCoord != 0.0) {this.playerPos.xCoord = Math.ceil(EntityPlayer.Position.xCoord * 10) / 10;}
++				if (EntityPlayer.Position.zCoord != 0.0) {this.playerPos.yCoord = Math.ceil(EntityPlayer.Position.yCoord * 10) / 10;}
++				if (EntityPlayer.Position.yCoord != 0.0) {this.playerPos.zCoord = Math.ceil(EntityPlayer.Position.zCoord * 10) / 10;}
++				String xStr = String.valueOf(this.playerPos.xCoord);
++				String yStr = String.valueOf(this.playerPos.yCoord);
++				String zStr = String.valueOf(this.playerPos.zCoord);
++				var8.drawStringWithShadow("x: "+xStr, 2, 12, 16777215);
++				var8.drawStringWithShadow("y: "+yStr, 2, 24, 16777215);
++				var8.drawStringWithShadow("z: "+zStr, 2, 36, 16777215);
++				if(this.tryDrawLBMStatus) {
++					int lbmPosition = 2;
++					long timeSinceTried = (System.currentTimeMillis() - LabyrinthModNative.TimeSinceTried);
++					if(timeSinceTried >= 5000) {
++						if(timeSinceTried <= 6000) {
++							lbmPosition = 2 - ((int)(timeSinceTried - 5000) / 5);
++						} else {
++							this.tryDrawLBMStatus = false;
++						}
++					}
++					if(LabyrinthModNative.Loaded) {
++						var8.drawStringWithShadow("LabyrinthModNative detected", lbmPosition, 48, 43520);
++					} else {
++						var8.drawStringWithShadow("LabyrinthModNative not detected", lbmPosition, 48, 10101010);
++					}
++				}
++			}
+ 		}
+ 
+ 		if(this.recordPlayingUpFor > 0) {
 --- net/minecraft/src/PlayerControllerSP.java
 +++ net/minecraft/src/PlayerControllerSP.java
 @@ -1,6 +1,7 @@
@@ -10,43 +65,75 @@
  	private int curBlockX = -1;
 --- net/minecraft/src/EntityPlayer.java
 +++ net/minecraft/src/EntityPlayer.java
-@@ -3,6 +3,7 @@
+@@ -3,6 +3,11 @@
  import java.util.List;
  
  public class EntityPlayer extends EntityLiving {
++	static Vec3D Position;
++
 +	private LabyrinthModNative labyrinthModNative;
++	private boolean tryCoordSet;
++
  	public InventoryPlayer inventory = new InventoryPlayer(this);
  	public byte unusedMiningCooldown = 0;
  	public int score = 0;
-@@ -22,6 +23,8 @@
+@@ -22,6 +27,14 @@
  		this.unusedRotation = 180.0F;
  		this.fireResistance = 20;
  		this.texture = "/char.png";
-+		this.labyrinthModNative = new LabyrinthModNative();
-+		this.labyrinthModNative.init();
++		try {
++			this.labyrinthModNative = new LabyrinthModNative();
++			this.labyrinthModNative.init();
++			this.tryCoordSet = true;
++		} catch(UnsatisfiedLinkError ignored) {
++			// the appropraite error has already been thrown.
++			this.tryCoordSet = false;
++		}
  	}
  
  	public void updateRidden() {
-@@ -53,6 +56,8 @@
+@@ -53,6 +66,19 @@
  	}
  
  	public void onLivingUpdate() {
-+		labyrinthModNative.setCoords(this.posX, this.posY, this.posZ);
-+	
++		if(this.tryCoordSet) {
++			labyrinthModNative.setCoords(this.posX, this.posY, this.posZ);
++		}
++		if(EntityPlayer.Position == null) {
++			EntityPlayer.Position = Vec3D.createVector(this.posX, this.posY, this.posZ);
++		} else {
++			if(this.posX != 0.0 && this.posY != 0.0 && this.posZ != 0.0) {
++				EntityPlayer.Position.xCoord = this.posX;
++				EntityPlayer.Position.yCoord = this.posY;
++				EntityPlayer.Position.zCoord = this.posZ;
++			}
++		}
++
  		if(this.worldObj.difficultySetting == 0 && this.health < 20 && this.ticksExisted % 20 * 4 == 0) {
  			this.heal(1);
  		}
 --- /dev/null
 +++ net/minecraft/src/LabyrinthModNative.java
-@@ -1,0 +1,14 @@
+@@ -1,0 +1,25 @@
 +package net.minecraft.src;
 +
 +import java.util.Map;
 +
 +public class LabyrinthModNative {
++    static boolean Loaded = false;
++    static long TimeSinceTried = 0;
++
++    
 +    static {
-+        System.out.println("Looking in "+System.getProperty("java.library.path")+" for libraries");
-+        System.loadLibrary("LabyrinthModNative");
++        try {
++            System.out.println("Looking in "+System.getProperty("java.library.path")+" for libraries");
++            System.loadLibrary("LabyrinthModNative");
++            LabyrinthModNative.Loaded = true;
++        } catch(UnsatisfiedLinkError ex) {
++            System.out.println("Could not load native library! "+ex.toString());
++            LabyrinthModNative.Loaded = false;
++        }
++        LabyrinthModNative.TimeSinceTried = System.currentTimeMillis();
 +    }
 +
 +    public native void init();
