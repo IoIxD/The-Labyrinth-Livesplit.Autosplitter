@@ -5,6 +5,7 @@ This repo resources for speedrunning [The Labyrinth](https://www.minecraftforum.
 It includes a mod for Minecraft Alpha 1.1.2 that:
 
 a.) that shows the player's position on screen.
+
 b.) makes a autosplitter possible, by copying said position in memory in such a way that external programs can hook into.
 
 ![ingame text](img/ingame_notice.png)
