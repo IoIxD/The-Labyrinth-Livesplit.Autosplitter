@@ -2,6 +2,11 @@
 
 These are resources for having LiveSplit automatically split while playing the first Minecraft adventure map, [The Labyrinth](https://www.minecraftforum.net/forums/mapping-and-modding-java-edition/maps/1454461-adv-the-labyrinth-a-dungeon-map-third-semifinal). It includes a mod for Minecraft Alpha 1.1.2 to store the player's position in a way that other program(s) can inspect, as well as the relevant autosplitter scripts.
 
+# Download
+
+[Make sure you read usage before you use this
+](https://github.com/IoIxD/The-Labyrinth-Livesplit.Autosplitter/releases/latest)
+
 # Usage
 
 **Reading this is carefully important as installing the mod is not like any other Minecraft mod.**
