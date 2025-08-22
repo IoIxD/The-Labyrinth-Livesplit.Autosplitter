@@ -1,125 +1,58 @@
---- net/minecraft/src/GuiIngame.java
-+++ net/minecraft/src/GuiIngame.java
-@@ -10,6 +10,11 @@
- import org.lwjgl.opengl.GL12;
+--- net/minecraft/src/EntityRenderer.java
++++ net/minecraft/src/EntityRenderer.java
+@@ -10,6 +10,7 @@
+ import org.lwjgl.opengl.GLContext;
+ import org.lwjgl.opengl.NVFogDistance;
+ import org.lwjgl.util.glu.GLU;
++import org.lwjgl.input.Keyboard;
  
- public class GuiIngame extends Gui {
-+	private int playerX;
-+	private int playerY;
-+	private int playerZ;
-+	private boolean tryDrawLBMStatus;
-+
- 	private static RenderItem itemRenderer = new RenderItem();
- 	private List chatMessageList = new ArrayList();
- 	private Random rand = new Random();
-@@ -23,6 +28,7 @@
- 
- 	public GuiIngame(Minecraft var1) {
+ public class EntityRenderer {
+ 	private Minecraft mc;
+@@ -31,6 +32,9 @@
+ 	public EntityRenderer(Minecraft var1) {
  		this.mc = var1;
-+		this.tryDrawLBMStatus = true;
- 	}
- 
- 	public void renderGameOverlay(float var1, boolean var2, int var3, int var4) {
-@@ -154,6 +160,28 @@
- 			this.drawString(var8, var21, var6 - var8.getStringWidth(var21) - 2, 12, 14737632);
- 		} else {
- 			var8.drawStringWithShadow("Minecraft Alpha v1.1.2", 2, 2, 16777215);
-+			String xStr = String.valueOf((int)EntityPlayer.PositionX);
-+			String yStr = String.valueOf((int)EntityPlayer.PositionY);
-+			String zStr = String.valueOf((int)EntityPlayer.PositionZ);
-+			var8.drawStringWithShadow("x: "+xStr, 2, 12, 16777215);
-+			var8.drawStringWithShadow("y: "+yStr, 2, 22, 16777215);
-+			var8.drawStringWithShadow("z: "+zStr, 2, 32, 16777215);
-+			if(this.tryDrawLBMStatus) {
-+				int lbmPosition = 2;
-+				long timeSinceTried = (System.currentTimeMillis() - LabyrinthModNative.TimeSinceTried);
-+				if(timeSinceTried >= 5000) {
-+					if(timeSinceTried <= 6000) {
-+						lbmPosition = 2 - ((int)(timeSinceTried - 5000) / 5);
-+					} else {
-+						this.tryDrawLBMStatus = false;
-+					}
-+				}
-+				if(LabyrinthModNative.Loaded) {
-+					var8.drawStringWithShadow("LabyrinthModNative detected", lbmPosition, 42, 43520);
-+				} else {
-+					var8.drawStringWithShadow("LabyrinthModNative not detected", lbmPosition, 42, 10101010);
-+				}
-+			}
- 		}
- 
- 		if(this.recordPlayingUpFor > 0) {
---- net/minecraft/src/PlayerControllerSP.java
-+++ net/minecraft/src/PlayerControllerSP.java
-@@ -1,6 +1,7 @@
- package net.minecraft.src;
- 
- import net.minecraft.client.Minecraft;
-+import net.minecraft.src.LabyrinthModNative;
- 
- public class PlayerControllerSP extends PlayerController {
- 	private int curBlockX = -1;
---- net/minecraft/src/EntityPlayer.java
-+++ net/minecraft/src/EntityPlayer.java
-@@ -3,6 +3,13 @@
- import java.util.List;
- 
- public class EntityPlayer extends EntityLiving {
-+	static double PositionX;
-+	static double PositionY;
-+	static double PositionZ;
-+
-+	private LabyrinthModNative labyrinthModNative;
-+	private boolean tryCoordSet;
-+
- 	public InventoryPlayer inventory = new InventoryPlayer(this);
- 	public byte unusedMiningCooldown = 0;
- 	public int score = 0;
-@@ -22,6 +29,14 @@
- 		this.unusedRotation = 180.0F;
- 		this.fireResistance = 20;
- 		this.texture = "/char.png";
-+		try {
-+			this.labyrinthModNative = new LabyrinthModNative();
-+			this.labyrinthModNative.init();
-+			this.tryCoordSet = true;
-+		} catch(UnsatisfiedLinkError ignored) {
-+			// the appropraite error has already been thrown.
-+			this.tryCoordSet = false;
+ 		this.itemRenderer = new ItemRenderer(var1);
++		if(!LabyrinthModNative.Loaded) {
++			LabyrinthModNative.Setup(this.mc);
 +		}
  	}
  
- 	public void updateRidden() {
-@@ -53,6 +68,13 @@
- 	}
- 
- 	public void onLivingUpdate() {
-+		if(this.tryCoordSet) {
-+			labyrinthModNative.setCoords(this.posX, this.posY, this.posZ);
-+		}
-+		EntityPlayer.PositionX = this.posX;
-+		EntityPlayer.PositionY = this.posY;
-+		EntityPlayer.PositionZ = this.posZ;
-+
- 		if(this.worldObj.difficultySetting == 0 && this.health < 20 && this.ticksExisted % 20 * 4 == 0) {
- 			this.heal(1);
- 		}
+ 	public void updateRenderer() {
+@@ -270,6 +274,9 @@
+ 			if(this.mc.theWorld != null) {
+ 				this.renderWorld(var1);
+ 				this.mc.ingameGUI.renderGameOverlay(var1, this.mc.currentScreen != null, var10, var11);
++				if(!Keyboard.isKeyDown(Keyboard.KEY_F3)) {
++					LabyrinthModNative.Update();
++				}
+ 			} else {
+ 				GL11.glViewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
+ 				GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
 --- /dev/null
 +++ net/minecraft/src/LabyrinthModNative.java
-@@ -1,0 +1,25 @@
+@@ -1,0 +1,72 @@
 +package net.minecraft.src;
 +
++import java.awt.DisplayMode;
++import java.lang.reflect.Field;
 +import java.util.Map;
++import org.lwjgl.opengl.Display;
++import net.minecraft.client.Minecraft;
 +
 +public class LabyrinthModNative {
-+    static boolean Loaded = false;
-+    static long TimeSinceTried = 0;
++    public static boolean Loaded = false;
++    private static long TimeSinceTried = 0;
++    private static Minecraft mc;
++    private static boolean TryDrawLBMStatus = true;
++    private static Thread runThread = null;
 +
-+
-+    static {
++    public static void Setup(Minecraft mc) {
++        LabyrinthModNative.mc = mc;
++        
 +        try {
 +            System.out.println("Looking in "+System.getProperty("java.library.path")+" for libraries");
 +            System.loadLibrary("LabyrinthModNative");
++            LabyrinthModNative.init();
 +            LabyrinthModNative.Loaded = true;
 +        } catch(UnsatisfiedLinkError ex) {
 +            System.out.println("Could not load native library! "+ex.toString());
@@ -128,7 +61,45 @@
 +        LabyrinthModNative.TimeSinceTried = System.currentTimeMillis();
 +    }
 +
-+    public native void init();
++    public static native void init();
 +
-+    public native void setCoords(double x, double y, double z);
++    public static native void setCoords(double x, double y, double z);
++
++    public static void Update() {
++        if(LabyrinthModNative.Loaded) {
++            LabyrinthModNative.setCoords(TileEntityRenderer.staticPlayerX, TileEntityRenderer.staticPlayerY, TileEntityRenderer.staticPlayerZ);
++        }
++        try {
++            FontRenderer renderer = mc.fontRenderer;
++
++            String xStr = String.valueOf((int)TileEntityRenderer.staticPlayerX);
++            String yStr = String.valueOf((int)TileEntityRenderer.staticPlayerY);
++            String zStr = String.valueOf((int)TileEntityRenderer.staticPlayerZ);
++
++            if(renderer != null) {
++                renderer.drawStringWithShadow("x: "+xStr, 2, 12, 16777215);
++                renderer.drawStringWithShadow("y: "+yStr, 2, 22, 16777215);
++                renderer.drawStringWithShadow("z: "+zStr, 2, 32, 16777215);
++            }
++            if(LabyrinthModNative.TryDrawLBMStatus) {
++                int lbmPosition = 2;
++                long timeSinceTried = (System.currentTimeMillis() - LabyrinthModNative.TimeSinceTried);
++                if(timeSinceTried >= 5000) {
++                    if(timeSinceTried <= 6000) {
++                        lbmPosition = 2 - ((int)(timeSinceTried - 5000) / 5);
++                    } else {
++                        LabyrinthModNative.TryDrawLBMStatus = false;
++                    }
++                }
++                if(LabyrinthModNative.Loaded) {
++                    renderer.drawStringWithShadow("LabyrinthModNative detected", lbmPosition, 42, 43520);
++                } else {
++                    renderer.drawStringWithShadow("LabyrinthModNative not detected", lbmPosition, 42, 10101010);
++                }
++            }
++        } catch(Exception ex){
++            System.out.println(ex.toString());
++        }
++    }
++
 +}
