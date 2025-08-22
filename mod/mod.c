@@ -10,6 +10,7 @@ struct {
   double x;
   double y;
   double z;
+  bool shouldReset;
 } GLOBAL_INFO;
 
 static bool hasInited = false;
@@ -70,6 +71,14 @@ JNIEXPORT void JNICALL Java_net_minecraft_src_LabyrinthModNative_setCoords(
   GLOBAL_INFO.z = z;
 }
 
+
+
+
+JNIEXPORT void JNICALL Java_net_minecraft_src_LabyrinthModNative_setShouldReset(
+    JNIEnv *env, jobject obj, jboolean shouldReset) {
+      GLOBAL_INFO.shouldReset = shouldReset;
+    }
+
 // obfuscated bindings
 
 JNIEXPORT void JNICALL Java_om_init(JNIEnv *env, jobject obj) {
@@ -80,3 +89,8 @@ JNIEXPORT void JNICALL Java_om_setCoords(JNIEnv *env, jobject obj, jdouble x,
                                          jdouble y, jdouble z) {
   Java_net_minecraft_src_LabyrinthModNative_setCoords(env, obj, x, y, z);
 }
+
+JNIEXPORT void JNICALL Java_om_setShouldReset(
+    JNIEnv *env, jobject obj, jboolean shouldReset) {
+      GLOBAL_INFO.shouldReset = shouldReset;
+    }

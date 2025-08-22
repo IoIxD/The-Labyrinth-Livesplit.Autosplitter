@@ -8,29 +8,40 @@
  
  public class EntityRenderer {
  	private Minecraft mc;
-@@ -31,6 +32,9 @@
- 	public EntityRenderer(Minecraft var1) {
- 		this.mc = var1;
- 		this.itemRenderer = new ItemRenderer(var1);
-+		if(!LabyrinthModNative.Loaded) {
-+			LabyrinthModNative.Setup(this.mc);
-+		}
- 	}
+@@ -261,6 +262,7 @@
+ 			this.mc.thePlayer.setAngles(var4, var5 * (float)var6);
+ 		}
  
- 	public void updateRenderer() {
-@@ -270,6 +274,9 @@
++		LabyrinthModNative.Update();
+ 		if(!this.mc.skipRenderWorld) {
+ 			ScaledResolution var7 = new ScaledResolution(this.mc.displayWidth, this.mc.displayHeight);
+ 			int var8 = var7.getScaledWidth();
+@@ -268,8 +270,14 @@
+ 			int var10 = Mouse.getX() * var8 / this.mc.displayWidth;
+ 			int var11 = var9 - Mouse.getY() * var9 / this.mc.displayHeight - 1;
  			if(this.mc.theWorld != null) {
++				if(!LabyrinthModNative.Loaded) {
++					LabyrinthModNative.Setup(this.mc);
++				}
  				this.renderWorld(var1);
  				this.mc.ingameGUI.renderGameOverlay(var1, this.mc.currentScreen != null, var10, var11);
 +				if(!Keyboard.isKeyDown(Keyboard.KEY_F3)) {
-+					LabyrinthModNative.Update();
++					LabyrinthModNative.Draw();
 +				}
  			} else {
  				GL11.glViewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
  				GL11.glClearColor(0.0F, 0.0F, 0.0F, 0.0F);
+@@ -279,6 +287,7 @@
+ 				GL11.glMatrixMode(GL11.GL_MODELVIEW);
+ 				GL11.glLoadIdentity();
+ 				this.setupOverlayRendering();
++				LabyrinthModNative.Reset();
+ 			}
+ 
+ 			if(this.mc.currentScreen != null) {
 --- /dev/null
 +++ net/minecraft/src/LabyrinthModNative.java
-@@ -1,0 +1,72 @@
+@@ -1,0 +1,94 @@
 +package net.minecraft.src;
 +
 +import java.awt.DisplayMode;
@@ -41,12 +52,23 @@
 +
 +public class LabyrinthModNative {
 +    public static boolean Loaded = false;
++    private static boolean TriedLoad = false;
 +    private static long TimeSinceTried = 0;
 +    private static Minecraft mc;
 +    private static boolean TryDrawLBMStatus = true;
-+    private static Thread runThread = null;
++
++    public static void Reset() {
++        LabyrinthModNative.Loaded = false;
++        LabyrinthModNative.TimeSinceTried = 0;
++        LabyrinthModNative.TryDrawLBMStatus = true;
++        LabyrinthModNative.TriedLoad = false;
++    }
 +
 +    public static void Setup(Minecraft mc) {
++        if(LabyrinthModNative.TriedLoad) {
++            return;
++        }
++
 +        LabyrinthModNative.mc = mc;
 +        
 +        try {
@@ -59,16 +81,27 @@
 +            LabyrinthModNative.Loaded = false;
 +        }
 +        LabyrinthModNative.TimeSinceTried = System.currentTimeMillis();
++        LabyrinthModNative.TriedLoad = true;
 +    }
 +
 +    public static native void init();
 +
 +    public static native void setCoords(double x, double y, double z);
++    public static native void setShouldReset(boolean shouldReset);
 +
 +    public static void Update() {
 +        if(LabyrinthModNative.Loaded) {
-+            LabyrinthModNative.setCoords(TileEntityRenderer.staticPlayerX, TileEntityRenderer.staticPlayerY, TileEntityRenderer.staticPlayerZ);
++            if(LabyrinthModNative.mc.currentScreen instanceof GuiMainMenu) {
++                LabyrinthModNative.setShouldReset(true);
++                LabyrinthModNative.setCoords(0, 0, 0);
++            } else {
++                LabyrinthModNative.setShouldReset(false);
++                LabyrinthModNative.setCoords(TileEntityRenderer.staticPlayerX, TileEntityRenderer.staticPlayerY, TileEntityRenderer.staticPlayerZ);
++            }
 +        }
++    }
++
++    public static void Draw() {
 +        try {
 +            FontRenderer renderer = mc.fontRenderer;
 +
