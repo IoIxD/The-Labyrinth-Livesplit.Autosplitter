@@ -1,5 +1,0 @@
-CompileFlags:
-  Add:
-    - "-I/usr/java/jdk1.8.0_202-amd64/include"            # e.g `-I/usr/include/SDL2`  suggested from @Palmkeep
-    - "-I/usr/java/jdk1.8.0_202-amd64/include/linux"            # e.g `-I/usr/include/SDL2`  suggested from @Palmkeep
-   
