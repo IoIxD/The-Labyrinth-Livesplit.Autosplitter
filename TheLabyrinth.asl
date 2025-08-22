@@ -27,6 +27,7 @@ init {
     vars.PlayerXPtr = (IntPtr)(vars.FitnessGramPacerTest + 288);
     vars.PlayerYPtr = (IntPtr)(vars.FitnessGramPacerTest + 296);
     vars.PlayerZPtr = (IntPtr)(vars.FitnessGramPacerTest + 304);
+    vars.ShouldResetPtr = (IntPtr)(vars.FitnessGramPacerTest + 312);
 
     vars.splits = new Dictionary<string, Func<bool>>()
     {
@@ -38,42 +39,42 @@ init {
         {"WoodenTower",  () => vars.PlayerX >= 269 && vars.PlayerX <= 293 && vars.PlayerZ >= -283 && vars.PlayerZ <= -258},
         {"Waterfalls",   () => vars.PlayerX >= 279 && vars.PlayerX <= 283 && vars.PlayerY >= 93 && vars.PlayerY <= 96 && vars.PlayerZ >= -271 && vars.PlayerZ <= -264 },
         {"LastLevel",    () => vars.PlayerX >= 369 && vars.PlayerX <= 399 && vars.PlayerZ >= -296 && vars.PlayerZ <= -265},
-        {"TheEnd", () => vars.PlayerX >= 471 && vars.PlayerX <= 552 && vars.PlayerY >= 15 && vars.PlayerY <= 68 && vars.PlayerZ >= -325 && vars.PlayerZ <= -283},
+        {"TheEnd", () => vars.PlayerX >= 471 && vars.PlayerX <= 552 && vars.PlayerZ >= -325 && vars.PlayerZ <= -283},
     };
     vars.completedSplits = new HashSet<string>();
-
-    vars.resetSplits = (Action)(() =>
-    {
-        vars.completedSplits.Clear();
-        print("[DELTARUNE] All splits have been reset to initial state");
-    });
 }
 
 update {
     vars.PlayerX = game.ReadValue<double>((IntPtr)vars.PlayerXPtr);
     vars.PlayerY = game.ReadValue<double>((IntPtr)vars.PlayerYPtr);
     vars.PlayerZ = game.ReadValue<double>((IntPtr)vars.PlayerZPtr);
-
+    vars.ShouldReset = game.ReadValue<bool>((IntPtr)vars.ShouldResetPtr);
     // print(vars.PlayerY.ToString());
-    // print(vars.PlayerX.ToString()+", "+vars.PlayerZ.ToString());
+    // print(vars.PlayerX.ToString()+", "+vars.PlayerY.ToString()+", "+vars.PlayerZ.ToString());
 }
 
 
 reset {
-    if(vars.PlayerX >= 275 && vars.PlayerX <= 279 && vars.PlayerZ >= -208 && vars.PlayerZ <= -179 && vars.PlayerY <= 20) {
+    if(vars.ShouldReset) {
+        return true;
+    }
+    if((vars.PlayerX >= 275 && vars.PlayerX <= 279 && vars.PlayerZ >= -208 && vars.PlayerZ <= -179 && vars.PlayerY <= 20)) {
         return true;
     }
 }
 
 start {
-    if(vars.PlayerX >= 255 && vars.PlayerX <= 299 && vars.PlayerZ >= -178 && vars.PlayerZ <= -135 && vars.PlayerY <= 20) {
-        return true;
+    if(!vars.ShouldReset) {
+        print(vars.PlayerX.ToString());
+        if(vars.PlayerX >= 255 && vars.PlayerX <= 299 && vars.PlayerZ >= -178 && vars.PlayerZ <= -135 && vars.PlayerY <= 20) {
+            return true;
+        }
     }
 }
 
 onReset
 {
-    vars.resetSplits();
+    vars.completedSplits.Clear();
 }
 
 split
