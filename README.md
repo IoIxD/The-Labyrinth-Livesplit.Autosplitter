@@ -20,6 +20,8 @@ First of all, since it's a coremod, you'll need to install it differently. For P
 
 ![alt text](img/prismlauncher_coremod.png)
 
+and select the .zip that you downloaded (do not extract the .zip).
+
 In absense of a launcher, you'll need to extract the .zip and put the .class files in your minecraft.jar.
 
 If you want the autosplitter to work, then after installing it, the corresponding `.dll` file needs to be placed in the appropriate natives directory for your Minecraft instance so that it can be run at runtime. If you don't know what the directory is, the mod will print it out when it tries to load it, something that happens when you open up a world.
